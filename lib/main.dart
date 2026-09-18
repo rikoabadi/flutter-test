@@ -134,6 +134,10 @@ class RegistrationNotifier {
       return;
     }
 
+    if (!context.mounted) {
+      return;
+    }
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('$title: $message')));

@@ -14,7 +14,7 @@ class NativeMessageBoxWindows {
         titlePointer,
         MB_OK | MB_ICONINFORMATION,
       );
-      return result.value != 0;
+      return result != 0;
     } finally {
       calloc.free(titlePointer);
       calloc.free(messagePointer);
