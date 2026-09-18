@@ -47,4 +47,18 @@ void main() {
     );
     expect(find.textContaining('JSON length: 377'), findsOneWidget);
   });
+
+  testWidgets('treats empty input as zero for array benchmark', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
+
+    await tester.enterText(find.byType(TextField), '');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
+    await tester.pump();
+
+    expect(
+      find.textContaining(RegExp(r'Array manipulation time: \d+ ms')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('JSON length: 2'), findsOneWidget);
+  });
 }
