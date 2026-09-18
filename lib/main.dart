@@ -1,14 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'native_message_box.dart';
 
-typedef MessageNotifier = void Function(
+typedef MessageNotifier = Future<void> Function(
   BuildContext context,
   String title,
   String message,
 );
-typedef NativeMessageBoxHandler = bool Function(String title, String message);
+typedef NativeMessageBoxHandler = Future<bool> Function(
+  String title,
+  String message,
+);
 
 void main() {
   runApp(const MyApp());
@@ -54,14 +56,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
     final name = _nameController.text.trim();
     final message = 'Hallo $name';
-    widget.messageNotifier(context, 'Registrasi', message);
+    await widget.messageNotifier(context, 'Registrasi', message);
   }
 
   @override
@@ -122,13 +124,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
 }
 
 class RegistrationNotifier {
-  static void show(
+  static Future<void> show(
     BuildContext context,
     String title,
     String message, {
     NativeMessageBoxHandler nativeMessageBoxHandler = NativeMessageBox.show,
-  }) {
-    if (!kIsWeb && nativeMessageBoxHandler(title, message)) {
+  }) async {
+    if (await nativeMessageBoxHandler(title, message)) {
       return;
     }
 

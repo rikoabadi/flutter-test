@@ -1,3 +1,3 @@
 class NativeMessageBox {
-  static bool show(String title, String message) => false;
+  static Future<bool> show(String title, String message) async => false;
 }

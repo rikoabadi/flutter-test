@@ -19,7 +19,7 @@ void main() {
 
     await tester.pumpWidget(
       MyApp(
-        messageNotifier: (_, title, message) {
+        messageNotifier: (_, title, message) async {
           capturedTitle = title;
           capturedMessage = message;
         },
@@ -40,12 +40,12 @@ void main() {
 
     await tester.pumpWidget(
       MyApp(
-        messageNotifier: (context, title, message) {
-          RegistrationNotifier.show(
+        messageNotifier: (context, title, message) async {
+          await RegistrationNotifier.show(
             context,
             title,
             message,
-            nativeMessageBoxHandler: (title, message) {
+            nativeMessageBoxHandler: (title, message) async {
               capturedTitle = title;
               capturedMessage = message;
               return true;
@@ -67,12 +67,12 @@ void main() {
   testWidgets('shows snackbar fallback outside Windows', (tester) async {
     await tester.pumpWidget(
       MyApp(
-        messageNotifier: (context, title, message) {
-          RegistrationNotifier.show(
+        messageNotifier: (context, title, message) async {
+          await RegistrationNotifier.show(
             context,
             title,
             message,
-            nativeMessageBoxHandler: (_, __) => false,
+            nativeMessageBoxHandler: (_, __) async => false,
           );
         },
       ),
