@@ -19,38 +19,10 @@ void main() {
 
     await tester.pumpWidget(
       MyApp(
-        messageNotifier: (_, title, message) async {
+        nativeMessageBoxHandler: (title, message) async {
           capturedTitle = title;
           capturedMessage = message;
-        },
-      ),
-    );
-
-    await tester.enterText(find.byType(TextFormField), 'Riko');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
-    await tester.pumpAndSettle();
-
-    expect(capturedTitle, 'Registrasi');
-    expect(capturedMessage, 'Hallo Riko');
-  });
-
-  testWidgets('uses native notification handler without snackbar when supported', (tester) async {
-    String? capturedTitle;
-    String? capturedMessage;
-
-    await tester.pumpWidget(
-      MyApp(
-        messageNotifier: (context, title, message) async {
-          await RegistrationNotifier.show(
-            context,
-            title,
-            message,
-            nativeMessageBoxHandler: (title, message) async {
-              capturedTitle = title;
-              capturedMessage = message;
-              return true;
-            },
-          );
+          return true;
         },
       ),
     );
@@ -67,14 +39,7 @@ void main() {
   testWidgets('shows snackbar fallback outside Windows', (tester) async {
     await tester.pumpWidget(
       MyApp(
-        messageNotifier: (context, title, message) async {
-          await RegistrationNotifier.show(
-            context,
-            title,
-            message,
-            nativeMessageBoxHandler: (_, __) async => false,
-          );
-        },
+        nativeMessageBoxHandler: (_, __) async => false,
       ),
     );
 

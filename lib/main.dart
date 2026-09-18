@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'native_message_box.dart';
 
-typedef MessageNotifier = Future<void> Function(
-  BuildContext context,
-  String title,
-  String message,
-);
 typedef NativeMessageBoxHandler = Future<bool> Function(
   String title,
   String message,
@@ -17,9 +12,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.messageNotifier = RegistrationNotifier.show});
+  const MyApp({super.key, this.nativeMessageBoxHandler = NativeMessageBox.show});
 
-  final MessageNotifier messageNotifier;
+  final NativeMessageBoxHandler nativeMessageBoxHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: RegistrationPage(messageNotifier: messageNotifier),
+      home: RegistrationPage(nativeMessageBoxHandler: nativeMessageBoxHandler),
     );
   }
 }
@@ -37,10 +32,10 @@ class MyApp extends StatelessWidget {
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({
     super.key,
-    this.messageNotifier = RegistrationNotifier.show,
+    this.nativeMessageBoxHandler = NativeMessageBox.show,
   });
 
-  final MessageNotifier messageNotifier;
+  final NativeMessageBoxHandler nativeMessageBoxHandler;
 
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
@@ -49,6 +44,8 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>?
+      _registrationSnackBarController;
 
   @override
   void dispose() {
@@ -62,8 +59,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
     }
 
     final name = _nameController.text.trim();
+    const title = 'Registrasi';
     final message = 'Hallo $name';
-    await widget.messageNotifier(context, 'Registrasi', message);
+    final nativeNotificationShown = await _tryShowNativeNotification(
+      widget.nativeMessageBoxHandler,
+      title,
+      message,
+    );
+
+    if (nativeNotificationShown || !mounted) {
+      return;
+    }
+
+    _registrationSnackBarController?.close();
+    _registrationSnackBarController = ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$title: $message')),
+    );
   }
 
   @override
@@ -120,34 +131,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
       ),
     );
-  }
-}
-
-class RegistrationNotifier {
-  static Future<void> show(
-    BuildContext context,
-    String title,
-    String message, {
-    NativeMessageBoxHandler nativeMessageBoxHandler = NativeMessageBox.show,
-  }) async {
-    final nativeNotificationShown = await _tryShowNativeNotification(
-      nativeMessageBoxHandler,
-      title,
-      message,
-    );
-
-    if (nativeNotificationShown) {
-      return;
-    }
-
-    if (!context.mounted) {
-      return;
-    }
-
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    scaffoldMessenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$title: $message')));
   }
 
   static Future<bool> _tryShowNativeNotification(
