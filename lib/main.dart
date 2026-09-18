@@ -1,11 +1,20 @@
+import 'dart:ffi' as ffi;
+import 'dart:io';
+
+import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
+import 'package:win32/win32.dart';
+
+typedef MessageBoxHandler = void Function(String title, String message);
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.messageBoxHandler = NativeMessageBox.show});
+
+  final MessageBoxHandler messageBoxHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +24,18 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: const RegistrationPage(),
+      home: RegistrationPage(messageBoxHandler: messageBoxHandler),
     );
   }
 }
 
 class RegistrationPage extends StatefulWidget {
-  const RegistrationPage({super.key});
+  const RegistrationPage({
+    super.key,
+    this.messageBoxHandler = NativeMessageBox.show,
+  });
+
+  final MessageBoxHandler messageBoxHandler;
 
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
@@ -43,20 +57,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     }
 
     final name = _nameController.text.trim();
-
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Registrasi'),
-        content: Text('Hallo $name'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    widget.messageBoxHandler('Registrasi', 'Hallo $name');
   }
 
   @override
@@ -113,5 +114,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
       ),
     );
+  }
+}
+
+class NativeMessageBox {
+  static void show(String title, String message) {
+    if (!Platform.isWindows) {
+      return;
+    }
+
+    final titlePointer = title.toNativeUtf16();
+    final messagePointer = message.toNativeUtf16();
+
+    try {
+      MessageBox(
+        ffi.nullptr,
+        messagePointer,
+        titlePointer,
+        MESSAGEBOX_STYLE.MB_OK | MESSAGEBOX_STYLE.MB_ICONINFORMATION,
+      );
+    } finally {
+      calloc.free(titlePointer);
+      calloc.free(messagePointer);
+    }
   }
 }
