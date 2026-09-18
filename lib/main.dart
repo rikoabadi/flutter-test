@@ -4,16 +4,20 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:win32/win32.dart';
 
-typedef MessageBoxHandler = bool Function(String title, String message);
+typedef MessageNotifier = void Function(
+  BuildContext context,
+  String title,
+  String message,
+);
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.messageBoxHandler = NativeMessageBox.show});
+  const MyApp({super.key, this.messageNotifier = RegistrationNotifier.show});
 
-  final MessageBoxHandler messageBoxHandler;
+  final MessageNotifier messageNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: RegistrationPage(messageBoxHandler: messageBoxHandler),
+      home: RegistrationPage(messageNotifier: messageNotifier),
     );
   }
 }
@@ -31,10 +35,10 @@ class MyApp extends StatelessWidget {
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({
     super.key,
-    this.messageBoxHandler = NativeMessageBox.show,
+    this.messageNotifier = RegistrationNotifier.show,
   });
 
-  final MessageBoxHandler messageBoxHandler;
+  final MessageNotifier messageNotifier;
 
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
@@ -57,14 +61,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
     final name = _nameController.text.trim();
     final message = 'Hallo $name';
-
-    if (widget.messageBoxHandler('Registrasi', message)) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    widget.messageNotifier(context, 'Registrasi', message);
   }
 
   @override
@@ -124,27 +121,34 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 }
 
-class NativeMessageBox {
-  /// Shows a native Windows MessageBox and returns whether a native popup was displayed.
-  ///
-  /// On Windows this opens the OS MessageBox directly through Win32 API.
-  /// On other platforms it returns `false` so callers can provide their own fallback UI.
-  static bool show(String title, String message) {
-    if (!Platform.isWindows) {
-      return false;
+class RegistrationNotifier {
+  static void show(BuildContext context, String title, String message) {
+    if (Platform.isWindows) {
+      NativeMessageBox.show(title, message);
+      return;
     }
 
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class NativeMessageBox {
+  /// Shows a native Windows MessageBox through Win32 API.
+  ///
+  /// Callers should only invoke this on Windows and provide a separate fallback UI elsewhere.
+  static void show(String title, String message) {
     final titlePointer = title.toNativeUtf16();
     final messagePointer = message.toNativeUtf16();
 
     try {
-      final result = MessageBox(
+      MessageBox(
         null,
         messagePointer,
         titlePointer,
         MB_OK | MB_ICONINFORMATION,
       );
-      return result.value != 0;
     } finally {
       calloc.free(titlePointer);
       calloc.free(messagePointer);

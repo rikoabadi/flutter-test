@@ -19,10 +19,9 @@ void main() {
 
     await tester.pumpWidget(
       MyApp(
-        messageBoxHandler: (title, message) {
+        messageNotifier: (_, title, message) {
           capturedTitle = title;
           capturedMessage = message;
-          return true;
         },
       ),
     );
@@ -36,11 +35,7 @@ void main() {
   });
 
   testWidgets('shows snackbar fallback outside Windows', (tester) async {
-    await tester.pumpWidget(
-      MyApp(
-        messageBoxHandler: (_, __) => false,
-      ),
-    );
+    await tester.pumpWidget(const MyApp());
 
     await tester.enterText(find.byType(TextFormField), 'Riko');
     await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
