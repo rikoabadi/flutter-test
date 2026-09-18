@@ -65,7 +65,18 @@ void main() {
   });
 
   testWidgets('shows snackbar fallback outside Windows', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(
+      MyApp(
+        messageNotifier: (context, title, message) {
+          RegistrationNotifier.show(
+            context,
+            title,
+            message,
+            nativeMessageBoxHandler: (_, __) => false,
+          );
+        },
+      ),
+    );
 
     await tester.enterText(find.byType(TextFormField), 'Riko');
     await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
