@@ -71,7 +71,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    _registrationSnackBarController?.close();
+    final previousSnackBarController = _registrationSnackBarController;
+    _registrationSnackBarController = null;
+
+    if (previousSnackBarController != null) {
+      previousSnackBarController.close();
+      await previousSnackBarController.closed;
+
+      if (!mounted) {
+        return;
+      }
+    }
+
     _registrationSnackBarController = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$title: $message')),
     );
