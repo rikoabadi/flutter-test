@@ -59,15 +59,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
-    }
-
     setState(() {
       _isSubmitting = true;
     });
 
     try {
+      if (!(_formKey.currentState?.validate() ?? false)) {
+        return;
+      }
+
       final name = _nameController.text.trim();
       const title = 'Registrasi';
       final message = 'Hallo $name';
