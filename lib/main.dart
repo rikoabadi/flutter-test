@@ -7,18 +7,6 @@ void main() {
   runApp(const BenchmarkApp());
 }
 
-List<Map<String, dynamic>> buildBenchmarkUsers(int n) {
-  final List<Map<String, dynamic>> items = [];
-  for (int i = 1; i <= n; i++) {
-    items.add({
-      'id': i,
-      'name': 'User_$i',
-      'score': i * 1.5,
-    });
-  }
-  return items;
-}
-
 class BenchmarkApp extends StatelessWidget {
   const BenchmarkApp({super.key});
 
@@ -58,7 +46,8 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
   }
 
   int _parseN() {
-    return int.tryParse(_numberController.text) ?? 0;
+    final parsed = int.tryParse(_numberController.text) ?? 0;
+    return parsed < 0 ? 0 : parsed;
   }
 
   void _onTestPressed() {
@@ -82,7 +71,15 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
     final n = _parseN();
     final stopwatch = Stopwatch()..start();
 
-    final items = buildBenchmarkUsers(n);
+    final List<Map<String, dynamic>> items = [];
+    for (int i = 1; i <= n; i++) {
+      items.add({
+        'id': i,
+        'name': 'User_$i',
+        'score': i * 1.5,
+      });
+    }
+
     final encoded = jsonEncode(items);
     _lastEncodedJsonLength = encoded.length;
 
