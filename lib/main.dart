@@ -144,9 +144,10 @@ class RegistrationNotifier {
       return;
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$title: $message')));
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    scaffoldMessenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('$title: $message')));
   }
 
   static Future<bool> _tryShowNativeNotification(
