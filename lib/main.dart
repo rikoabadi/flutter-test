@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const BenchmarkApp());
@@ -36,6 +37,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
   );
 
   String _resultText = '';
+  int lastEncodedJsonLength = 0;
 
   @override
   void dispose() {
@@ -78,7 +80,8 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
       });
     }
 
-    jsonEncode(items);
+    final encoded = jsonEncode(items);
+    lastEncodedJsonLength = encoded.length;
 
     stopwatch.stop();
 
@@ -117,6 +120,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
               child: TextField(
                 controller: _numberController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
