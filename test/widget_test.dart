@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,20 +24,26 @@ void main() {
     expect(find.textContaining('Hasil: 27'), findsOneWidget);
   });
 
+  testWidgets('treats empty input as zero for math benchmark', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
+
+    await tester.enterText(find.byType(TextField), '');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test'));
+    await tester.pump();
+
+    expect(find.textContaining('Hasil: 0'), findsOneWidget);
+  });
+
   testWidgets('runs array benchmark and shows execution text', (tester) async {
     await tester.pumpWidget(const BenchmarkApp());
 
     await tester.enterText(find.byType(TextField), '10');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
     await tester.pump();
-    final expectedJsonLength = jsonEncode(List.generate(10, (index) {
-      final i = index + 1;
-      return {'id': i, 'name': 'User_$i', 'score': i * 1.5};
-    })).length;
 
     expect(find.textContaining('Array manipulation time:'), findsOneWidget);
     expect(
-      find.textContaining('JSON length: $expectedJsonLength'),
+      find.textContaining('JSON length: 377'),
       findsOneWidget,
     );
   });
