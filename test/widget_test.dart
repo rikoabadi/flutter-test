@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_test/main.dart';
+import 'package:flutter_test_app/main.dart';
 
 void main() {
   testWidgets('shows validation message when name is empty', (tester) async {
