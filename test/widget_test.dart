@@ -13,9 +13,7 @@ void main() {
     expect(find.text('Input harus di isi'), findsOneWidget);
   });
 
-  testWidgets('shows greeting message through native handler after valid input', (
-    tester,
-  ) async {
+  testWidgets('shows greeting message through native handler after valid input', (tester) async {
     String? capturedTitle;
     String? capturedMessage;
 
@@ -24,6 +22,7 @@ void main() {
         messageBoxHandler: (title, message) {
           capturedTitle = title;
           capturedMessage = message;
+          return true;
         },
       ),
     );
@@ -34,5 +33,20 @@ void main() {
 
     expect(capturedTitle, 'Registrasi');
     expect(capturedMessage, 'Hallo Riko');
+  });
+
+  testWidgets('shows snackbar fallback outside Windows', (tester) async {
+    await tester.pumpWidget(
+      MyApp(
+        messageBoxHandler: (_, __) => false,
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'Riko');
+    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hallo Riko'), findsOneWidget);
+    expect(find.byType(SnackBar), findsOneWidget);
   });
 }

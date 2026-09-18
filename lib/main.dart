@@ -4,7 +4,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:win32/win32.dart';
 
-typedef MessageBoxHandler = void Function(String title, String message);
+typedef MessageBoxHandler = bool Function(String title, String message);
 
 void main() {
   runApp(const MyApp());
@@ -56,7 +56,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
     }
 
     final name = _nameController.text.trim();
-    widget.messageBoxHandler('Registrasi', 'Hallo $name');
+    final message = 'Hallo $name';
+
+    if (widget.messageBoxHandler('Registrasi', message)) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -117,9 +125,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
 }
 
 class NativeMessageBox {
-  static void show(String title, String message) {
+  /// Shows a native Windows MessageBox and returns whether a native popup was displayed.
+  ///
+  /// On Windows this opens the OS MessageBox directly through Win32 API.
+  /// On other platforms it returns `false` so callers can provide their own fallback UI.
+  static bool show(String title, String message) {
     if (!Platform.isWindows) {
-      return;
+      return false;
     }
 
     final titlePointer = title.toNativeUtf16();
@@ -132,6 +144,7 @@ class NativeMessageBox {
         titlePointer,
         MB_OK | MB_ICONINFORMATION,
       );
+      return true;
     } finally {
       calloc.free(titlePointer);
       calloc.free(messagePointer);
