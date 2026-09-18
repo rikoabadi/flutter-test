@@ -8,6 +8,7 @@ typedef MessageNotifier = void Function(
   String title,
   String message,
 );
+typedef NativeMessageBoxHandler = bool Function(String title, String message);
 
 void main() {
   runApp(const MyApp());
@@ -121,9 +122,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
 }
 
 class RegistrationNotifier {
-  static void show(BuildContext context, String title, String message) {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-      NativeMessageBox.show(title, message);
+  static void show(
+    BuildContext context,
+    String title,
+    String message, {
+    NativeMessageBoxHandler nativeMessageBoxHandler = NativeMessageBox.show,
+  }) {
+    if (!kIsWeb && nativeMessageBoxHandler(title, message)) {
       return;
     }
 

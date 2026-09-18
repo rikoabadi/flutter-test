@@ -1,3 +1,3 @@
 class NativeMessageBox {
-  static void show(String title, String message) {}
+  static bool show(String title, String message) => false;
 }

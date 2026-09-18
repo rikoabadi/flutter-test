@@ -34,6 +34,36 @@ void main() {
     expect(capturedMessage, 'Hallo Riko');
   });
 
+  testWidgets('uses native notification handler without snackbar when supported', (tester) async {
+    String? capturedTitle;
+    String? capturedMessage;
+
+    await tester.pumpWidget(
+      MyApp(
+        messageNotifier: (context, title, message) {
+          RegistrationNotifier.show(
+            context,
+            title,
+            message,
+            nativeMessageBoxHandler: (title, message) {
+              capturedTitle = title;
+              capturedMessage = message;
+              return true;
+            },
+          );
+        },
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'Riko');
+    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
+    await tester.pumpAndSettle();
+
+    expect(capturedTitle, 'Registrasi');
+    expect(capturedMessage, 'Hallo Riko');
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
   testWidgets('shows snackbar fallback outside Windows', (tester) async {
     await tester.pumpWidget(const MyApp());
 
