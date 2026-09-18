@@ -44,6 +44,7 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  bool _isSubmitting = false;
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>?
       _registrationSnackBarController;
 
@@ -54,38 +55,55 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) {
+      return;
+    }
+
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
-    final name = _nameController.text.trim();
-    const title = 'Registrasi';
-    final message = 'Hallo $name';
-    final nativeNotificationShown = await _tryShowNativeNotification(
-      widget.nativeMessageBoxHandler,
-      title,
-      message,
-    );
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    if (nativeNotificationShown || !mounted) {
-      return;
-    }
+    try {
+      final name = _nameController.text.trim();
+      const title = 'Registrasi';
+      final message = 'Hallo $name';
+      final nativeNotificationShown = await _tryShowNativeNotification(
+        widget.nativeMessageBoxHandler,
+        title,
+        message,
+      );
 
-    final previousSnackBarController = _registrationSnackBarController;
-    _registrationSnackBarController = null;
-
-    if (previousSnackBarController != null) {
-      previousSnackBarController.close();
-      await previousSnackBarController.closed;
-
-      if (!mounted) {
+      if (nativeNotificationShown || !mounted) {
         return;
       }
-    }
 
-    _registrationSnackBarController = ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$title: $message')),
-    );
+      final previousSnackBarController = _registrationSnackBarController;
+      _registrationSnackBarController = null;
+
+      if (previousSnackBarController != null) {
+        previousSnackBarController.close();
+        await previousSnackBarController.closed;
+
+        if (!mounted) {
+          return;
+        }
+      }
+
+      _registrationSnackBarController = ScaffoldMessenger.of(context)
+          .showSnackBar(
+            SnackBar(content: Text('$title: $message')),
+          );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -130,7 +148,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       ),
                       const SizedBox(height: 12),
                       FilledButton(
-                        onPressed: _submit,
+                        onPressed: _isSubmitting ? null : _submit,
                         child: const Text('Registrasi'),
                       ),
                     ],
