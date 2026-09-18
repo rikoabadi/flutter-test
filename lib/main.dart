@@ -44,6 +44,7 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  bool _submitLocked = false;
   bool _isSubmitting = false;
 
   @override
@@ -53,17 +54,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Future<void> _submit() async {
-    if (_isSubmitting) {
+    if (_submitLocked) {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    _submitLocked = true;
 
     try {
       if (!(_formKey.currentState?.validate() ?? false)) {
         return;
+      }
+
+      if (mounted) {
+        setState(() {
+          _isSubmitting = true;
+        });
       }
 
       final name = _nameController.text.trim();
@@ -85,10 +90,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
         SnackBar(content: Text('$title: $message')),
       );
     } finally {
-      _isSubmitting = false;
+      _submitLocked = false;
 
       if (mounted) {
-        setState(() {});
+        setState(() {
+          _isSubmitting = false;
+        });
       }
     }
   }
