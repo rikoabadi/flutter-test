@@ -8,7 +8,7 @@ class NativeMessageBoxWindows {
     final messagePointer = message.toNativeUtf16();
 
     try {
-      final result = MessageBoxW(
+      final result = MessageBox(
         0,
         messagePointer,
         titlePointer,
