@@ -58,9 +58,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    setState(() {
-      _submitLocked = true;
-    });
+    _submitLocked = true;
 
     try {
       if (!(_formKey.currentState?.validate() ?? false)) {
@@ -97,6 +95,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
           _submitLocked = false;
           _isSubmitting = false;
         });
+      } else {
+        _submitLocked = false;
       }
     }
   }

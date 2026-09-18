@@ -51,6 +51,17 @@ void main() {
     expect(find.byType(SnackBar), findsOneWidget);
   });
 
+  testWidgets('uses default fallback path outside Windows', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.enterText(find.byType(TextFormField), 'Riko');
+    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
+    expect(find.byType(SnackBar), findsOneWidget);
+  });
+
   testWidgets('falls back to snackbar when native handler throws', (tester) async {
     final previousOnError = FlutterError.onError;
     FlutterErrorDetails? reportedError;
