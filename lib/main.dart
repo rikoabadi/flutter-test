@@ -138,13 +138,13 @@ class NativeMessageBox {
     final messagePointer = message.toNativeUtf16();
 
     try {
-      MessageBox(
+      final result = MessageBox(
         null,
         messagePointer,
         titlePointer,
         MB_OK | MB_ICONINFORMATION,
       );
-      return true;
+      return result.value != 0;
     } finally {
       calloc.free(titlePointer);
       calloc.free(messagePointer);
