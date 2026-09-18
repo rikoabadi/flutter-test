@@ -32,15 +32,15 @@ void main() {
     await tester.enterText(find.byType(TextField), '10');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
     await tester.pump();
-
-    final state =
-        tester.state(find.byType(BenchmarkScreen)) as dynamic;
     final expectedJsonLength = jsonEncode(List.generate(10, (index) {
       final i = index + 1;
       return {'id': i, 'name': 'User_$i', 'score': i * 1.5};
     })).length;
 
     expect(find.textContaining('Array manipulation time:'), findsOneWidget);
-    expect(state.lastEncodedJsonLength, expectedJsonLength);
+    expect(
+      find.textContaining('JSON length: $expectedJsonLength'),
+      findsOneWidget,
+    );
   });
 }

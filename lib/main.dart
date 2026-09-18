@@ -37,7 +37,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
   );
 
   String _resultText = '';
-  int lastEncodedJsonLength = 0;
+  int _lastEncodedJsonLength = 0;
 
   @override
   void dispose() {
@@ -81,13 +81,13 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
     }
 
     final encoded = jsonEncode(items);
-    lastEncodedJsonLength = encoded.length;
+    _lastEncodedJsonLength = encoded.length;
 
     stopwatch.stop();
 
     setState(() {
       _resultText =
-          'Array manipulation time: ${stopwatch.elapsedMilliseconds} ms';
+          'Array manipulation time: ${stopwatch.elapsedMilliseconds} ms | JSON length: $_lastEncodedJsonLength';
     });
   }
 
