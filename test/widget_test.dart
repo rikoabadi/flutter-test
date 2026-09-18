@@ -50,4 +50,21 @@ void main() {
     expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
     expect(find.byType(SnackBar), findsOneWidget);
   });
+
+  testWidgets('falls back to snackbar when native handler throws', (tester) async {
+    await tester.pumpWidget(
+      MyApp(
+        nativeMessageBoxHandler: (_, __) async {
+          throw Exception('native message box failed');
+        },
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'Riko');
+    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
+    expect(find.byType(SnackBar), findsOneWidget);
+  });
 }

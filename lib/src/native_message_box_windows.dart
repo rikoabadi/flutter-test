@@ -10,7 +10,7 @@ class NativeMessageBoxWindows {
 
     try {
       final result = MessageBoxW(
-        ownerWindow == 0 ? null : ownerWindow,
+        ownerWindow == 0 ? 0 : ownerWindow,
         messagePointer,
         titlePointer,
         MB_OK | MB_ICONINFORMATION,
