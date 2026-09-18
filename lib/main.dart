@@ -46,8 +46,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
   }
 
   int _parseN() {
-    final parsed = int.tryParse(_numberController.text) ?? 0;
-    return parsed < 0 ? 0 : parsed;
+    return int.tryParse(_numberController.text) ?? 0;
   }
 
   void _onTestPressed() {
