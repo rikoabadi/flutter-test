@@ -6,10 +6,11 @@ class NativeMessageBoxWindows {
   static bool show(String title, String message) {
     final titlePointer = title.toNativeUtf16();
     final messagePointer = message.toNativeUtf16();
+    final ownerWindow = GetActiveWindow();
 
     try {
       final result = MessageBox(
-        null,
+        ownerWindow,
         messagePointer,
         titlePointer,
         MB_OK | MB_ICONINFORMATION,

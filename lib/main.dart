@@ -169,7 +169,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
   ) async {
     try {
       return await nativeMessageBoxHandler(title, message);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'registration notification',
+          context: ErrorDescription(
+            'while showing the native registration notification',
+          ),
+        ),
+      );
       return false;
     }
   }
