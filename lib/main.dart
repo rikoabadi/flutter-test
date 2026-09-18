@@ -1,4 +1,3 @@
-import 'dart:ffi' as ffi;
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
@@ -128,10 +127,10 @@ class NativeMessageBox {
 
     try {
       MessageBox(
-        ffi.nullptr,
+        null,
         messagePointer,
         titlePointer,
-        MESSAGEBOX_STYLE.MB_OK | MESSAGEBOX_STYLE.MB_ICONINFORMATION,
+        MB_OK | MB_ICONINFORMATION,
       );
     } finally {
       calloc.free(titlePointer);
