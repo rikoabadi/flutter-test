@@ -1,95 +1,80 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_test_app/main.dart';
 
 void main() {
-  testWidgets('shows validation message when name is empty', (tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('shows benchmark UI defaults', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Input harus di isi'), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('2000'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Test'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Test Array'), findsOneWidget);
   });
 
-  testWidgets('shows greeting message through native handler after valid input', (tester) async {
-    String? capturedTitle;
-    String? capturedMessage;
+  testWidgets('runs math benchmark and shows total', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
 
-    await tester.pumpWidget(
-      MyApp(
-        nativeMessageBoxHandler: (title, message) async {
-          capturedTitle = title;
-          capturedMessage = message;
-          return true;
-        },
-      ),
-    );
+    await tester.enterText(find.byType(TextField), '10');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test'));
+    await tester.pump();
 
-    await tester.enterText(find.byType(TextFormField), 'Riko');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
-    await tester.pumpAndSettle();
-
-    expect(capturedTitle, 'Registrasi');
-    expect(capturedMessage, 'Hallo Riko');
-    expect(find.byType(SnackBar), findsNothing);
+    expect(find.textContaining('Execution time:'), findsOneWidget);
+    expect(find.textContaining('Hasil: 27'), findsOneWidget);
   });
 
-  testWidgets('shows snackbar fallback outside Windows', (tester) async {
-    await tester.pumpWidget(
-      MyApp(
-        nativeMessageBoxHandler: (_, __) async => false,
-      ),
-    );
+  testWidgets('treats empty input as zero for math benchmark', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
 
-    await tester.enterText(find.byType(TextFormField), 'Riko');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
-    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test'));
+    await tester.pump();
 
-    expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.textContaining('Hasil: 0'), findsOneWidget);
   });
 
-  testWidgets('uses default fallback path outside Windows', (tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('runs array benchmark and shows execution text', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
 
-    await tester.enterText(find.byType(TextFormField), 'Riko');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
-    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '10');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
+    await tester.pump();
+    final expectedLength = jsonEncode(List.generate(10, (index) {
+      final i = index + 1;
+      return {'id': i, 'name': 'User_$i', 'score': i * 1.5};
+    })).length;
 
-    expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
-    expect(find.byType(SnackBar), findsOneWidget);
-  });
-
-  testWidgets('falls back to snackbar when native handler throws', (tester) async {
-    final previousOnError = FlutterError.onError;
-    FlutterErrorDetails? reportedError;
-
-    FlutterError.onError = (details) {
-      reportedError = details;
-    };
-    addTearDown(() {
-      FlutterError.onError = previousOnError;
-    });
-
-    await tester.pumpWidget(
-      MyApp(
-        nativeMessageBoxHandler: (_, __) async {
-          throw Exception('native message box failed');
-        },
-      ),
-    );
-
-    await tester.enterText(find.byType(TextFormField), 'Riko');
-    await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
-    expect(find.byType(SnackBar), findsOneWidget);
     expect(
-      reportedError?.exceptionAsString(),
-      contains('native message box failed'),
+      find.textContaining(RegExp(r'Array manipulation time: \d+ ms')),
+      findsOneWidget,
     );
+    expect(find.textContaining('JSON length: $expectedLength'), findsOneWidget);
+  });
+
+  testWidgets('treats empty input as zero for array benchmark', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
+
+    await tester.enterText(find.byType(TextField), '');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
+    await tester.pump();
+
+    expect(
+      find.textContaining(RegExp(r'Array manipulation time: \d+ ms')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('JSON length: 2'), findsOneWidget);
+  });
+
+  testWidgets('filters non-digit input before benchmark runs', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
+
+    await tester.enterText(find.byType(TextField), '12ab3');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test'));
+    await tester.pump();
+
+    expect(find.textContaining('Hasil: 367'), findsOneWidget);
   });
 }
