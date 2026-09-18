@@ -80,8 +80,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
       };
     });
 
-    final encoded = jsonEncode(items);
-    _lastEncodedJsonLength = encoded.length;
+    _lastEncodedJsonLength = jsonEncode(items).length;
 
     stopwatch.stop();
 

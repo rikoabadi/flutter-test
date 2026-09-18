@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,12 +42,16 @@ void main() {
     await tester.enterText(find.byType(TextField), '10');
     await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
     await tester.pump();
+    final expectedLength = jsonEncode(List.generate(10, (index) {
+      final i = index + 1;
+      return {'id': i, 'name': 'User_$i', 'score': i * 1.5};
+    })).length;
 
     expect(
       find.textContaining(RegExp(r'Array manipulation time: \d+ ms')),
       findsOneWidget,
     );
-    expect(find.textContaining('JSON length: 377'), findsOneWidget);
+    expect(find.textContaining('JSON length: $expectedLength'), findsOneWidget);
   });
 
   testWidgets('treats empty input as zero for array benchmark', (tester) async {
@@ -60,5 +66,15 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('JSON length: 2'), findsOneWidget);
+  });
+
+  testWidgets('filters non-digit input before benchmark runs', (tester) async {
+    await tester.pumpWidget(const BenchmarkApp());
+
+    await tester.enterText(find.byType(TextField), '12ab3');
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Test'));
+    await tester.pump();
+
+    expect(find.textContaining('Hasil: 367'), findsOneWidget);
   });
 }
