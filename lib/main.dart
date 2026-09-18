@@ -130,7 +130,13 @@ class RegistrationNotifier {
     String message, {
     NativeMessageBoxHandler nativeMessageBoxHandler = NativeMessageBox.show,
   }) async {
-    if (await nativeMessageBoxHandler(title, message)) {
+    final nativeNotificationShown = await _tryShowNativeNotification(
+      nativeMessageBoxHandler,
+      title,
+      message,
+    );
+
+    if (nativeNotificationShown) {
       return;
     }
 
@@ -141,5 +147,17 @@ class RegistrationNotifier {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('$title: $message')));
+  }
+
+  static Future<bool> _tryShowNativeNotification(
+    NativeMessageBoxHandler nativeMessageBoxHandler,
+    String title,
+    String message,
+  ) async {
+    try {
+      return await nativeMessageBoxHandler(title, message);
+    } catch (_) {
+      return false;
+    }
   }
 }
