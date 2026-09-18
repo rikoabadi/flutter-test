@@ -10,7 +10,12 @@ class NativeMessageBox {
       return false;
     }
 
-    await (_loadLibraryFuture ??= native_message_box_windows.loadLibrary());
+    try {
+      await (_loadLibraryFuture ??= native_message_box_windows.loadLibrary());
+    } catch (_) {
+      _loadLibraryFuture = null;
+      rethrow;
+    }
 
     return native_message_box_windows.NativeMessageBoxWindows.show(
       title,

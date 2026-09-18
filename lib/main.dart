@@ -81,12 +81,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
         return;
       }
 
-      _registrationSnackBarController?.close();
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-      _registrationSnackBarController = ScaffoldMessenger.of(context)
-          .showSnackBar(
-            SnackBar(content: Text('$title: $message')),
-          );
+      if (_registrationSnackBarController != null) {
+        scaffoldMessenger.removeCurrentSnackBar();
+      }
+
+      _registrationSnackBarController = scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('$title: $message')),
+      );
     } finally {
       if (mounted) {
         setState(() {
