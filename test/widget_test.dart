@@ -41,10 +41,10 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Test Array'));
     await tester.pump();
 
-    expect(find.textContaining('Array manipulation time:'), findsOneWidget);
     expect(
-      find.textContaining(RegExp(r'JSON length: [1-9]\d*')),
+      find.textContaining(RegExp(r'Array manipulation time: \d+ ms')),
       findsOneWidget,
     );
+    expect(find.textContaining('JSON length: 377'), findsOneWidget);
   });
 }
