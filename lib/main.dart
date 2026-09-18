@@ -1,8 +1,7 @@
-import 'dart:io';
-
-import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:win32/win32.dart';
+
+import 'native_message_box.dart';
 
 typedef MessageNotifier = void Function(
   BuildContext context,
@@ -123,7 +122,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
 class RegistrationNotifier {
   static void show(BuildContext context, String title, String message) {
-    if (Platform.isWindows) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
       NativeMessageBox.show(title, message);
       return;
     }
@@ -131,27 +130,5 @@ class RegistrationNotifier {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-}
-
-class NativeMessageBox {
-  /// Shows a native Windows MessageBox through Win32 API.
-  ///
-  /// Callers should only invoke this on Windows and provide a separate fallback UI elsewhere.
-  static void show(String title, String message) {
-    final titlePointer = title.toNativeUtf16();
-    final messagePointer = message.toNativeUtf16();
-
-    try {
-      MessageBox(
-        null,
-        messagePointer,
-        titlePointer,
-        MB_OK | MB_ICONINFORMATION,
-      );
-    } finally {
-      calloc.free(titlePointer);
-      calloc.free(messagePointer);
-    }
   }
 }
