@@ -129,6 +129,6 @@ class RegistrationNotifier {
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ).showSnackBar(SnackBar(content: Text('$title: $message')));
   }
 }

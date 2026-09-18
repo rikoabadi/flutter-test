@@ -41,7 +41,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Registrasi'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Hallo Riko'), findsOneWidget);
+    expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
     expect(find.byType(SnackBar), findsOneWidget);
   });
 }
