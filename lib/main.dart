@@ -1,181 +1,163 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
-import 'native_message_box.dart';
-
-typedef NativeMessageBoxHandler = Future<bool> Function(
-  String title,
-  String message,
-);
-
 void main() {
-  runApp(const MyApp());
+  runApp(const BenchmarkApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.nativeMessageBoxHandler = NativeMessageBox.show});
-
-  final NativeMessageBoxHandler nativeMessageBoxHandler;
+class BenchmarkApp extends StatelessWidget {
+  const BenchmarkApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Registrasi',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-        useMaterial3: true,
+      debugShowCheckedModeBanner: false,
+      title: 'Benchmark App',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF1E1E1E),
+        canvasColor: const Color(0xFF1E1E1E),
       ),
-      home: RegistrationPage(nativeMessageBoxHandler: nativeMessageBoxHandler),
+      home: const BenchmarkScreen(),
     );
   }
 }
 
-class RegistrationPage extends StatefulWidget {
-  const RegistrationPage({
-    super.key,
-    this.nativeMessageBoxHandler = NativeMessageBox.show,
-  });
-
-  final NativeMessageBoxHandler nativeMessageBoxHandler;
+class BenchmarkScreen extends StatefulWidget {
+  const BenchmarkScreen({super.key});
 
   @override
-  State<RegistrationPage> createState() => _RegistrationPageState();
+  State<BenchmarkScreen> createState() => _BenchmarkScreenState();
 }
 
-class _RegistrationPageState extends State<RegistrationPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  bool _submitLocked = false;
-  bool _isSubmitting = false;
+class _BenchmarkScreenState extends State<BenchmarkScreen> {
+  final TextEditingController _numberController = TextEditingController(
+    text: '2000',
+  );
+
+  String _resultText = '';
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _numberController.dispose();
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    if (_submitLocked) {
-      return;
+  int _parseN() {
+    final parsed = int.tryParse(_numberController.text) ?? 0;
+    return parsed < 0 ? 0 : parsed;
+  }
+
+  void _onTestPressed() {
+    final n = _parseN();
+    final stopwatch = Stopwatch()..start();
+
+    int total = 0;
+    for (int i = 1; i <= n; i++) {
+      total += (i % 7);
     }
 
-    _submitLocked = true;
+    stopwatch.stop();
 
-    try {
-      if (!(_formKey.currentState?.validate() ?? false)) {
-        return;
-      }
+    setState(() {
+      _resultText =
+          'Execution time: ${stopwatch.elapsedMilliseconds} ms | Hasil: $total';
+    });
+  }
 
-      if (mounted) {
-        setState(() {
-          _isSubmitting = true;
-        });
-      }
+  void _onTestArrayPressed() {
+    final n = _parseN();
+    final stopwatch = Stopwatch()..start();
 
-      final name = _nameController.text.trim();
-      const title = 'Registrasi';
-      final message = 'Hallo $name';
-      final nativeNotificationShown = await _tryShowNativeNotification(
-        widget.nativeMessageBoxHandler,
-        title,
-        message,
-      );
-
-      if (nativeNotificationShown || !mounted) {
-        return;
-      }
-
-      final scaffoldMessenger = ScaffoldMessenger.of(context);
-      scaffoldMessenger.removeCurrentSnackBar();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('$title: $message')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _submitLocked = false;
-          _isSubmitting = false;
-        });
-      } else {
-        _submitLocked = false;
-      }
+    final List<Map<String, dynamic>> items = [];
+    for (int i = 1; i <= n; i++) {
+      items.add({
+        'id': i,
+        'name': 'User_$i',
+        'score': i * 1.5,
+      });
     }
+
+    jsonEncode(items);
+
+    stopwatch.stop();
+
+    setState(() {
+      _resultText =
+          'Array manipulation time: ${stopwatch.elapsedMilliseconds} ms';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final outlineBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(4),
+      borderSide: const BorderSide(color: Color(0xFF5A5A5A), width: 1),
+    );
+
+    final buttonStyle = ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF2C2C2C),
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+        side: const BorderSide(color: Color(0xFF5A5A5A), width: 1),
+      ),
+      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'Registrasi',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nama',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Input harus di isi';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: (_isSubmitting || _submitLocked) ? null : _submit,
-                        child: const Text('Registrasi'),
-                      ),
-                    ],
-                  ),
+      body: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 210,
+              child: TextField(
+                controller: _numberController,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: const Color(0xFF2C2C2C),
+                  enabledBorder: outlineBorder,
+                  focusedBorder: outlineBorder,
                 ),
               ),
             ),
-          ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: _onTestPressed,
+                  style: buttonStyle,
+                  child: const Text('Test'),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: _onTestArrayPressed,
+                  style: buttonStyle,
+                  child: const Text('Test Array'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Text(
+              _resultText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  static Future<bool> _tryShowNativeNotification(
-    NativeMessageBoxHandler nativeMessageBoxHandler,
-    String title,
-    String message,
-  ) async {
-    try {
-      return await nativeMessageBoxHandler(title, message);
-    } catch (error, stackTrace) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: error,
-          stack: stackTrace,
-          library: 'registration notification',
-          context: ErrorDescription(
-            'while showing the native registration notification',
-          ),
-        ),
-      );
-      return false;
-    }
   }
 }
