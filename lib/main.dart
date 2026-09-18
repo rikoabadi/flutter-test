@@ -45,8 +45,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   bool _isSubmitting = false;
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>?
-      _registrationSnackBarController;
 
   @override
   void dispose() {
@@ -59,16 +57,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    _isSubmitting = true;
+    setState(() {
+      _isSubmitting = true;
+    });
 
     try {
       if (!(_formKey.currentState?.validate() ?? false)) {
-        _isSubmitting = false;
         return;
-      }
-
-      if (mounted) {
-        setState(() {});
       }
 
       final name = _nameController.text.trim();
@@ -85,20 +80,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
       }
 
       final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-      if (_registrationSnackBarController != null) {
-        scaffoldMessenger.removeCurrentSnackBar();
-      }
-
-      final snackBarController = scaffoldMessenger.showSnackBar(
+      scaffoldMessenger.removeCurrentSnackBar();
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('$title: $message')),
       );
-      _registrationSnackBarController = snackBarController;
-      snackBarController.closed.whenComplete(() {
-        if (identical(_registrationSnackBarController, snackBarController)) {
-          _registrationSnackBarController = null;
-        }
-      });
     } finally {
       _isSubmitting = false;
 
