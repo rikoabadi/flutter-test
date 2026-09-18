@@ -71,14 +71,14 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
     final n = _parseN();
     final stopwatch = Stopwatch()..start();
 
-    final List<Map<String, dynamic>> items = [];
-    for (int i = 1; i <= n; i++) {
-      items.add({
+    final items = List.generate(n, (index) {
+      final i = index + 1;
+      return <String, dynamic>{
         'id': i,
         'name': 'User_$i',
         'score': i * 1.5,
-      });
-    }
+      };
+    });
 
     final encoded = jsonEncode(items);
     _lastEncodedJsonLength = encoded.length;
