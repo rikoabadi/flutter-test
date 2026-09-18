@@ -58,7 +58,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    _submitLocked = true;
+    setState(() {
+      _submitLocked = true;
+    });
 
     try {
       if (!(_formKey.currentState?.validate() ?? false)) {
@@ -90,10 +92,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
         SnackBar(content: Text('$title: $message')),
       );
     } finally {
-      _submitLocked = false;
-
       if (mounted) {
         setState(() {
+          _submitLocked = false;
           _isSubmitting = false;
         });
       }
@@ -142,7 +143,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       ),
                       const SizedBox(height: 12),
                       FilledButton(
-                        onPressed: _isSubmitting ? null : _submit,
+                        onPressed: (_isSubmitting || _submitLocked) ? null : _submit,
                         child: const Text('Registrasi'),
                       ),
                     ],
