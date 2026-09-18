@@ -52,6 +52,16 @@ void main() {
   });
 
   testWidgets('falls back to snackbar when native handler throws', (tester) async {
+    final previousOnError = FlutterError.onError;
+    FlutterErrorDetails? reportedError;
+
+    FlutterError.onError = (details) {
+      reportedError = details;
+    };
+    addTearDown(() {
+      FlutterError.onError = previousOnError;
+    });
+
     await tester.pumpWidget(
       MyApp(
         nativeMessageBoxHandler: (_, __) async {
@@ -66,5 +76,9 @@ void main() {
 
     expect(find.text('Registrasi: Hallo Riko'), findsOneWidget);
     expect(find.byType(SnackBar), findsOneWidget);
+    expect(
+      reportedError?.exceptionAsString(),
+      contains('native message box failed'),
+    );
   });
 }

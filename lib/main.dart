@@ -59,13 +59,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    _isSubmitting = true;
 
     try {
       if (!(_formKey.currentState?.validate() ?? false)) {
+        _isSubmitting = false;
         return;
+      }
+
+      if (mounted) {
+        setState(() {});
       }
 
       final name = _nameController.text.trim();
@@ -87,14 +90,20 @@ class _RegistrationPageState extends State<RegistrationPage> {
         scaffoldMessenger.removeCurrentSnackBar();
       }
 
-      _registrationSnackBarController = scaffoldMessenger.showSnackBar(
+      final snackBarController = scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('$title: $message')),
       );
+      _registrationSnackBarController = snackBarController;
+      snackBarController.closed.whenComplete(() {
+        if (identical(_registrationSnackBarController, snackBarController)) {
+          _registrationSnackBarController = null;
+        }
+      });
     } finally {
+      _isSubmitting = false;
+
       if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
+        setState(() {});
       }
     }
   }
